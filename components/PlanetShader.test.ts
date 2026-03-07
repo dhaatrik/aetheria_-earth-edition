@@ -22,6 +22,18 @@ describe('Planet Shaders', () => {
       expect(planetVertexShader).toContain('void main()');
       expect(planetVertexShader).toContain('gl_Position =');
     });
+
+    it('should calculate and assign positions correctly', () => {
+      expect(planetVertexShader).toContain('vUv = uv;');
+      expect(planetVertexShader).toContain('vPosition = position;');
+      expect(planetVertexShader).toContain('vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);');
+      expect(planetVertexShader).toContain('vViewPosition = -mvPosition.xyz;');
+      expect(planetVertexShader).toContain('gl_Position = projectionMatrix * mvPosition;');
+    });
+
+    it('should calculate normals correctly', () => {
+      expect(planetVertexShader).toContain('vNormal = normalize(normalMatrix * normal);');
+    });
   });
 
   describe('planetFragmentShader', () => {
