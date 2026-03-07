@@ -1,6 +1,11 @@
 
 import { PlanetLore, PlanetParameters, POIData, ChallengeTarget } from "../types";
 
+const safeNumber = (val: any, fallback: number): number => {
+  const num = Number(val);
+  return Number.isNaN(num) ? fallback : num;
+};
+
 // --- CORE GENERATION ---
 
 export const generatePlanetData = async (): Promise<{ lore: PlanetLore, params: Partial<PlanetParameters> }> => {
@@ -13,22 +18,24 @@ export const generatePlanetData = async (): Promise<{ lore: PlanetLore, params: 
     const data = await response.json();
     
     const lore: PlanetLore = {
-      name: data.name,
-      description: data.description,
-      age: data.age,
-      civilizationType: data.civilizationType,
-      atmosphereComposition: data.atmosphereComposition,
-      population: data.population,
-      habitabilityScore: data.habitabilityScore
+      name: String(data.name || "Unknown World"),
+      description: String(data.description || "A mysterious planet."),
+      age: String(data.age || "Unknown"),
+      civilizationType: String(data.civilizationType || "None"),
+      atmosphereComposition: Array.isArray(data.atmosphereComposition)
+        ? data.atmosphereComposition.map(String)
+        : ["Unknown"],
+      population: String(data.population || "0"),
+      habitabilityScore: safeNumber(data.habitabilityScore, 0)
     };
 
     const params: Partial<PlanetParameters> = {
-      rotationSpeed: data.rotationSpeed || 0.05,
-      atmosphereColor: data.atmosphereColor || "#3b82f6",
-      cityLightColor: data.cityLightColor || "#ffaa33",
+      rotationSpeed: safeNumber(data.rotationSpeed, 0.05),
+      atmosphereColor: String(data.atmosphereColor || "#3b82f6"),
+      cityLightColor: String(data.cityLightColor || "#ffaa33"),
       cityLightIntensity: 1.0,
-      waterMurkiness: data.waterMurkiness || 0.0,
-      snowLevel: data.snowLevel || 0.0,
+      waterMurkiness: safeNumber(data.waterMurkiness, 0.0),
+      snowLevel: safeNumber(data.snowLevel, 0.0),
     };
 
     return { lore, params };
@@ -76,15 +83,15 @@ export const triggerDisaster = async (currentLore: PlanetLore): Promise<{ loreUp
 
   return {
     loreUpdate: {
-      description: `[EVENT: ${data.eventTitle}] ${data.newDescription}`,
-      habitabilityScore: data.habitabilityScore
+      description: `[EVENT: ${String(data.eventTitle || "Unknown Event")}] ${String(data.newDescription || "Something happened.")}`,
+      habitabilityScore: safeNumber(data.habitabilityScore, 0)
     },
     paramsUpdate: {
-      atmosphereColor: data.atmosphereColor,
-      waterMurkiness: data.waterMurkiness,
-      snowLevel: data.snowLevel,
-      cityLightIntensity: data.cityLightIntensity ?? 0.0,
-      cityLightColor: data.cityLightColor ?? "#ff0000"
+      atmosphereColor: String(data.atmosphereColor || "#ff0000"),
+      waterMurkiness: safeNumber(data.waterMurkiness, 0.0),
+      snowLevel: safeNumber(data.snowLevel, 0.0),
+      cityLightIntensity: safeNumber(data.cityLightIntensity, 0.0),
+      cityLightColor: String(data.cityLightColor || "#ff0000")
     }
   };
 };
@@ -101,15 +108,15 @@ export const evolveCivilization = async (currentLore: PlanetLore, years: number)
   
   return {
     loreUpdate: {
-      description: `[YEAR +${years}] ${data.newDescription}`,
+      description: `[YEAR +${years}] ${String(data.newDescription || "Civilization changed.")}`,
       civilizationType: "Evolved State",
       population: "Unknown",
-      habitabilityScore: data.habitabilityScore
+      habitabilityScore: safeNumber(data.habitabilityScore, 0)
     },
     paramsUpdate: {
-      cityLightColor: data.cityLightColor,
-      cityLightIntensity: data.cityLightIntensity,
-      atmosphereColor: data.atmosphereColor
+      cityLightColor: String(data.cityLightColor || "#ffffff"),
+      cityLightIntensity: safeNumber(data.cityLightIntensity, 1.0),
+      atmosphereColor: String(data.atmosphereColor || "#3b82f6")
     }
   };
 };
@@ -127,10 +134,10 @@ export const generateChallenge = async (): Promise<ChallengeTarget> => {
   return {
     active: true,
     success: false,
-    description: data.description,
+    description: String(data.description || "Restore the planet."),
     targetStats: {
-      habitabilityScore: data.targetHabitability,
-      cloudDensity: data.targetCloudDensity,
+      habitabilityScore: safeNumber(data.targetHabitability, 50),
+      cloudDensity: safeNumber(data.targetCloudDensity, 0.5),
     }
   };
 };
@@ -159,8 +166,8 @@ export const generatePOIReport = async (loreContext: string, coordinates: { x: n
     const data = await response.json();
     
     const result: POIData = {
-      title: data.title,
-      description: data.description,
+      title: String(data.title || "Unknown Location"),
+      description: String(data.description || "No data available."),
       coordinates
     };
 
