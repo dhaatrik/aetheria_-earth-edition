@@ -13,6 +13,20 @@ import {
 } from './PlanetShader';
 import * as random from 'maath/random/dist/maath-random.esm';
 
+// Fix missing JSX types for React Three Fiber elements
+declare global {
+  namespace JSX {
+    interface IntrinsicElements {
+      group: any;
+      mesh: any;
+      sphereGeometry: any;
+      meshBasicMaterial: any;
+      ambientLight: any;
+      pointLight: any;
+    }
+  }
+}
+
 interface SceneProps {
   params: PlanetParameters;
   onPlanetClick: (uv: THREE.Vector2) => void;
@@ -42,12 +56,6 @@ const SatelliteRing = () => {
   );
 }
 
-const SUN_COLORS = {
-  red: new THREE.Vector3(1.0, 0.4, 0.3),
-  blue: new THREE.Vector3(0.6, 0.8, 1.0),
-  default: new THREE.Vector3(1.0, 0.95, 0.9),
-};
-
 export const PlanetMesh: React.FC<{ params: PlanetParameters, onClick: (uv: THREE.Vector2) => void }> = ({ params, onClick }) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const cloudRef = useRef<THREE.Mesh>(null);
@@ -59,25 +67,46 @@ export const PlanetMesh: React.FC<{ params: PlanetParameters, onClick: (uv: THRE
   const DEFAULT_CLOUD = 'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_clouds_1024.png';
 
   // State for textures to handle dynamic swapping
-  const textureConfig = useMemo(() => ({
-    day: params.textureMapUrl || DEFAULT_DAY,
-    spec: DEFAULT_SPEC,
-    norm: DEFAULT_NORM,
-    cloud: params.cloudMapUrl || DEFAULT_CLOUD
-  }), [params.textureMapUrl, params.cloudMapUrl]);
+  const [textures, setTextures] = useState(() => ({
+    day: new THREE.TextureLoader().load(DEFAULT_DAY),
+    spec: new THREE.TextureLoader().load(DEFAULT_SPEC),
+    norm: new THREE.TextureLoader().load(DEFAULT_NORM),
+    cloud: new THREE.TextureLoader().load(DEFAULT_CLOUD)
+  }));
 
-  const textures = useTexture(textureConfig);
+  // Handle Dynamic Texture Updates
+  useEffect(() => {
+      const loader = new THREE.TextureLoader();
+
+      if (params.textureMapUrl) {
+          loader.load(params.textureMapUrl, (tex) => {
+              setTextures(prev => ({ ...prev, day: tex }));
+          });
+      } else {
+          // If no custom texture, revert to default (or keep current if we want persistence, but let's revert to earth for "reset")
+          // Logic: If params.textureMapUrl is undefined, we assume default Earth mode unless specifically maintaining state
+          if (!params.textureMapUrl) {
+               setTextures(prev => ({ ...prev, day: new THREE.TextureLoader().load(DEFAULT_DAY) }));
+          }
+      }
+
+      if (params.cloudMapUrl) {
+          loader.load(params.cloudMapUrl, (tex) => {
+              setTextures(prev => ({ ...prev, cloud: tex }));
+          });
+      }
+  }, [params.textureMapUrl, params.cloudMapUrl]);
 
   // Helper to map SunType to Color
   const getSunColor = (type: string) => {
     switch(type) {
-      case 'red': return SUN_COLORS.red;
-      case 'blue': return SUN_COLORS.blue;
-      default: return SUN_COLORS.default;
+      case 'red': return new THREE.Vector3(1.0, 0.4, 0.3);
+      case 'blue': return new THREE.Vector3(0.6, 0.8, 1.0);
+      default: return new THREE.Vector3(1.0, 0.95, 0.9);
     }
   };
 
-  const sunColorVec = getSunColor(params.sunType);
+  const sunColorVec = useMemo(() => getSunColor(params.sunType), [params.sunType]);
   const sunDir = useMemo(() => new THREE.Vector3(1, 0.5, 1).normalize(), []);
 
   // Map DataLayer string to int
@@ -90,59 +119,6 @@ export const PlanetMesh: React.FC<{ params: PlanetParameters, onClick: (uv: THRE
     }
   };
 
-  // Generate a seamless noise texture for city lights
-  const cityNoiseTexture = useMemo(() => {
-      const size = 64;
-      const data = new Uint8Array(size * size * 4);
-
-      // Generate low-res base noise (16x16) for coherence
-      const baseSize = 16;
-      const baseData = new Float32Array(baseSize * baseSize);
-      for(let i=0; i<baseData.length; i++) baseData[i] = Math.random();
-
-      // Upscale to size x size with bilinear interpolation and wrapping
-      for (let y = 0; y < size; y++) {
-          for (let x = 0; x < size; x++) {
-              // Normalized coords in base grid
-              const u = (x / size) * baseSize;
-              const v = (y / size) * baseSize;
-
-              const x0 = Math.floor(u);
-              const y0 = Math.floor(v);
-              const x1 = (x0 + 1) % baseSize;
-              const y1 = (y0 + 1) % baseSize; // Wrap for seamlessness
-
-              const fracX = u - x0;
-              const fracY = v - y0;
-
-              // Bilinear interp
-              const v00 = baseData[y0 * baseSize + x0];
-              const v10 = baseData[y0 * baseSize + x1];
-              const v01 = baseData[y1 * baseSize + x0];
-              const v11 = baseData[y1 * baseSize + x1];
-
-              const i1 = v00 * (1 - fracX) + v10 * fracX;
-              const i2 = v01 * (1 - fracX) + v11 * fracX;
-              const val = i1 * (1 - fracY) + i2 * fracY;
-
-              const byteVal = Math.floor(val * 255);
-              const idx = (y * size + x) * 4;
-              data[idx] = byteVal;
-              data[idx+1] = byteVal;
-              data[idx+2] = byteVal;
-              data[idx+3] = 255;
-          }
-      }
-
-      const texture = new THREE.DataTexture(data, size, size, THREE.RGBAFormat);
-      texture.wrapS = THREE.RepeatWrapping;
-      texture.wrapT = THREE.RepeatWrapping;
-      texture.minFilter = THREE.LinearFilter;
-      texture.magFilter = THREE.LinearFilter;
-      texture.needsUpdate = true;
-      return texture;
-  }, []);
-
   const planetMaterial = useMemo(() => {
     return new THREE.ShaderMaterial({
       vertexShader: planetVertexShader,
@@ -152,7 +128,6 @@ export const PlanetMesh: React.FC<{ params: PlanetParameters, onClick: (uv: THRE
         uDayTexture: { value: textures.day },
         uSpecularTexture: { value: textures.spec },
         uNormalMap: { value: textures.norm },
-        uCityNoiseTexture: { value: cityNoiseTexture },
         uSunDirection: { value: sunDir },
         uMode: { value: 0 },
         uSunColor: { value: sunColorVec },
@@ -162,7 +137,7 @@ export const PlanetMesh: React.FC<{ params: PlanetParameters, onClick: (uv: THRE
         uCityIntensity: { value: params.cityLightIntensity }
       }
     });
-  }, [sunDir, cityNoiseTexture]); // Note: textures not in dep array to avoid full material rebuild, we update uniform directly
+  }, [sunDir]); // Note: textures not in dep array to avoid full material rebuild, we update uniform directly
 
   // Effect to update material uniforms when textures/params change without rebuilding material
   useEffect(() => {
@@ -306,13 +281,10 @@ const CameraController: React.FC<{ isProbeLanding: boolean }> = ({ isProbeLandin
     if (controlsRef.current) {
       const targetDist = isProbeLanding ? 2.2 : 6; 
       const currentDist = controlsRef.current.object.position.length();
+      const newDist = THREE.MathUtils.lerp(currentDist, targetDist, delta * 2);
       
-      if (Math.abs(currentDist - targetDist) > 0.01) {
-        const newDist = THREE.MathUtils.lerp(currentDist, targetDist, delta * 2);
-
-        controlsRef.current.object.position.setLength(newDist);
-        controlsRef.current.update();
-      }
+      controlsRef.current.object.position.setLength(newDist);
+      controlsRef.current.update();
     }
   });
 
