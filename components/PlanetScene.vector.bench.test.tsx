@@ -6,7 +6,7 @@ import * as THREE from 'three';
 import { PlanetParameters } from '../types';
 
 vi.mock('three', async () => {
-  const actual = await vi.importActual('three') as any;
+  const actual = await vi.importActual<typeof THREE>('three');
 
   const MockVector3 = function(x?: number, y?: number, z?: number) {
     if (typeof globalThis.vectorInstantiationCount !== 'undefined') {
@@ -20,7 +20,7 @@ vi.mock('three', async () => {
     ...actual,
     Vector3: MockVector3,
     TextureLoader: class {
-      load(url: string, onLoad: (tex: any) => void) {
+      load(url: string, onLoad: (tex: THREE.Texture) => void) {
         const tex = new actual.Texture();
         if (onLoad) onLoad(tex);
         return tex;
@@ -43,7 +43,7 @@ vi.mock('@react-three/drei', async () => {
 });
 
 vi.mock('maath/random/dist/maath-random.esm', () => ({
-  inSphere: (array: any) => array,
+  inSphere: (array: Float32Array) => array,
 }));
 
 // Import PlanetMesh AFTER mocking

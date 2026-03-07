@@ -8,11 +8,11 @@ import { PlanetParameters } from '../types';
 
 // Mock THREE.TextureLoader to avoid network requests and errors
 vi.mock('three', async () => {
-  const actual = await vi.importActual('three') as any;
+  const actual = await vi.importActual<typeof THREE>('three');
   return {
     ...actual,
     TextureLoader: class {
-      load(url: string, onLoad: (tex: any) => void) {
+      load(url: string, onLoad: (tex: THREE.Texture) => void) {
         const tex = new actual.Texture();
         if (onLoad) onLoad(tex); // Synchronous callback
         return tex;
@@ -37,7 +37,7 @@ vi.mock('@react-three/drei', async () => {
 
 // Mock maath random to avoid issues
 vi.mock('maath/random/dist/maath-random.esm', () => ({
-  inSphere: (array: any) => array,
+  inSphere: (array: Float32Array) => array,
 }));
 
 describe('PlanetMesh Performance', () => {

@@ -10,10 +10,10 @@ import { PlanetParameters } from '../types';
 const shaderMaterialSpy = vi.fn();
 
 vi.mock('three', async () => {
-  const actual = await vi.importActual('three') as any;
+  const actual = await vi.importActual<typeof THREE>('three');
 
   // We need a proper constructor function
-  const MockShaderMaterial = function(args: any) {
+  const MockShaderMaterial = function(args: THREE.ShaderMaterialParameters) {
       shaderMaterialSpy(args);
       return new actual.ShaderMaterial(args);
   };
@@ -25,7 +25,7 @@ vi.mock('three', async () => {
     ...actual,
     ShaderMaterial: MockShaderMaterial,
     TextureLoader: class {
-        load(url: any, onLoad: any) {
+        load(url: string, onLoad: (tex: THREE.Texture) => void) {
             const tex = new actual.Texture();
             if(onLoad) onLoad(tex);
             return tex;
@@ -50,7 +50,7 @@ vi.mock('@react-three/drei', async () => {
 
 // Mock maath
 vi.mock('maath/random/dist/maath-random.esm', () => ({
-  inSphere: (array: any) => array,
+  inSphere: (array: Float32Array) => array,
 }));
 
 describe('PlanetMesh Material Stability', () => {
