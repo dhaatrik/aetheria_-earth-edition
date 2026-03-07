@@ -52,8 +52,6 @@ export const SoundEngine: React.FC<SoundEngineProps> = ({ enabled, params }) => 
       droneGain.connect(ctx.destination);
       osc.start();
       droneNodeRef.current = droneGain;
-
-      console.log("Audio Engine Started");
     }
 
     // Cleanup function: Closes context when enabled becomes false or component unmounts
