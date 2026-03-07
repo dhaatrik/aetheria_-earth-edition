@@ -50,7 +50,7 @@ vi.mock('@react-three/drei', async () => {
 
 // Mock maath
 vi.mock('maath/random/dist/maath-random.esm', () => ({
-  inSphere: (array: any) => array,
+  inSphere: (array: Float32Array) => array,
 }));
 
 describe('PlanetMesh Material Stability', () => {

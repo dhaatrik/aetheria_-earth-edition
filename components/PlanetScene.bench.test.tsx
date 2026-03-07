@@ -37,7 +37,7 @@ vi.mock('@react-three/drei', async () => {
 
 // Mock maath random to avoid issues
 vi.mock('maath/random/dist/maath-random.esm', () => ({
-  inSphere: (array: any) => array,
+  inSphere: (array: Float32Array) => array,
 }));
 
 describe('PlanetMesh Performance', () => {
