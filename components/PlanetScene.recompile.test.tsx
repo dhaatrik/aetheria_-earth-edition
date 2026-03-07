@@ -81,7 +81,6 @@ describe('PlanetMesh Material Stability', () => {
 
     // Initial render creates materials.
     const initialCount = shaderMaterialSpy.mock.calls.length;
-    console.log(`Initial ShaderMaterial calls: ${initialCount}`);
 
     // Expect at least 1 call (PlanetMesh creates planetMaterial, cloudMaterial, atmosMaterial)
     // Actually 3 calls.
@@ -93,11 +92,9 @@ describe('PlanetMesh Material Stability', () => {
     await renderer.update(<PlanetMesh params={newParams} onClick={() => {}} />);
 
     const finalCount = shaderMaterialSpy.mock.calls.length;
-    console.log(`Final ShaderMaterial calls: ${finalCount}`);
 
     // Calculate new calls
     const newCalls = finalCount - initialCount;
-    console.log(`New calls: ${newCalls}`);
 
     // Currently, planetMaterial (and possibly cloudMaterial?) depend on sunColorVec/sunDir.
     // planetMaterial depends on sunColorVec. So it should re-create.
@@ -121,8 +118,6 @@ describe('PlanetMesh Material Stability', () => {
     // params.sunType = 'red' -> Vector3(1.0, 0.4, 0.3)
     const expectedColor = new THREE.Vector3(1.0, 0.4, 0.3);
     const actualColor = material.uniforms.uSunColor.value;
-
-    // console.log("Actual Sun Color:", actualColor);
 
     expect(actualColor.x).toBeCloseTo(expectedColor.x);
     expect(actualColor.y).toBeCloseTo(expectedColor.y);
