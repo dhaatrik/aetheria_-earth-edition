@@ -2,6 +2,16 @@
 import React, { useEffect, useRef } from 'react';
 import { PlanetParameters } from '../types';
 
+const WIND_MAX_VOLUME = 0.3;
+const WIND_ROTATION_MULTIPLIER = 2;
+const WIND_CLOUD_MULTIPLIER = 0.1;
+const WIND_FADE_TIME = 0.5;
+
+const DRONE_FREQUENCY = 60;
+const DRONE_MAX_VOLUME = 0.15;
+const DRONE_INTENSITY_MULTIPLIER = 0.05;
+const DRONE_FADE_TIME = 0.5;
+
 interface SoundEngineProps {
   enabled: boolean;
   params: PlanetParameters;
@@ -45,7 +55,7 @@ export const SoundEngine: React.FC<SoundEngineProps> = ({ enabled, params }) => 
       // DRONE (Low Oscillator)
       const osc = ctx.createOscillator();
       osc.type = 'sine';
-      osc.frequency.value = 60; // 60Hz hum
+      osc.frequency.value = DRONE_FREQUENCY; // 60Hz hum
       const droneGain = ctx.createGain();
       droneGain.gain.value = 0.0;
       osc.connect(droneGain);
@@ -82,14 +92,14 @@ export const SoundEngine: React.FC<SoundEngineProps> = ({ enabled, params }) => 
     
     // Wind logic: Higher rotation + higher cloud density = louder wind
     if (windNodeRef.current) {
-        const windVolume = Math.min(0.3, (params.rotationSpeed * 2) + (params.cloudDensity * 0.1));
-        windNodeRef.current.gain.setTargetAtTime(windVolume, ctx.currentTime, 0.5);
+        const windVolume = Math.min(WIND_MAX_VOLUME, (params.rotationSpeed * WIND_ROTATION_MULTIPLIER) + (params.cloudDensity * WIND_CLOUD_MULTIPLIER));
+        windNodeRef.current.gain.setTargetAtTime(windVolume, ctx.currentTime, WIND_FADE_TIME);
     }
 
     // Drone logic: City intensity = louder hum
     if (droneNodeRef.current) {
-        const droneVolume = Math.min(0.15, params.cityLightIntensity * 0.05);
-        droneNodeRef.current.gain.setTargetAtTime(droneVolume, ctx.currentTime, 0.5);
+        const droneVolume = Math.min(DRONE_MAX_VOLUME, params.cityLightIntensity * DRONE_INTENSITY_MULTIPLIER);
+        droneNodeRef.current.gain.setTargetAtTime(droneVolume, ctx.currentTime, DRONE_FADE_TIME);
     }
 
   }, [params]); // Intentionally exclude 'enabled' to avoid re-running if params change while disabled
