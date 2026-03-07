@@ -25,7 +25,7 @@ vi.mock('three', async () => {
     ...actual,
     ShaderMaterial: MockShaderMaterial,
     TextureLoader: class {
-        load(url: any, onLoad: any) {
+        load(url: string, onLoad?: (texture: THREE.Texture) => void) {
             const tex = new actual.Texture();
             if(onLoad) onLoad(tex);
             return tex;
