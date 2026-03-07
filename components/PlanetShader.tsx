@@ -122,7 +122,7 @@ export const planetFragmentShader = `
     float hemisphereSign = sign(vUv.y - 0.5);
     
     // Base snow threshold + Terraforming Modifier (uSnowLevel)
-    // if uSnowLevel is 1.0, threshold drops to 0.0 (Earth freezes)
+    // When uSnowLevel is 1.0, threshold drops to 0.0 (Earth freezes)
     float baseThreshold = 0.85 - (uSnowLevel * 0.85); 
     
     float snowThreshold = baseThreshold;
