@@ -98,8 +98,6 @@ describe('PlanetMesh Performance', () => {
     const framesToAdvance = 10;
     await renderer.advanceFrames(framesToAdvance, 0.1);
 
-    console.log(`uSnowLevel setter called ${setCounts} times over ${framesToAdvance} frames`);
-
     // Optimized: Updates moved to useEffect, so no updates during frame loop for static params.
     expect(setCounts).toBe(0);
   });

@@ -22,6 +22,18 @@ describe('Planet Shaders', () => {
       expect(planetVertexShader).toContain('void main()');
       expect(planetVertexShader).toContain('gl_Position =');
     });
+
+    it('should calculate and assign positions correctly', () => {
+      expect(planetVertexShader).toContain('vUv = uv;');
+      expect(planetVertexShader).toContain('vPosition = position;');
+      expect(planetVertexShader).toContain('vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);');
+      expect(planetVertexShader).toContain('vViewPosition = -mvPosition.xyz;');
+      expect(planetVertexShader).toContain('gl_Position = projectionMatrix * mvPosition;');
+    });
+
+    it('should calculate normals correctly', () => {
+      expect(planetVertexShader).toContain('vNormal = normalize(normalMatrix * normal);');
+    });
   });
 
   describe('planetFragmentShader', () => {
@@ -69,6 +81,19 @@ describe('Planet Shaders', () => {
     it('should have a main function that sets gl_FragColor', () => {
       expect(planetFragmentShader).toContain('void main()');
       expect(planetFragmentShader).toContain('gl_FragColor =');
+    });
+  });
+
+  describe('cloudVertexShader', () => {
+    it('should define required varyings', () => {
+      expect(cloudVertexShader).toContain('varying vec2 vUv;');
+      expect(cloudVertexShader).toContain('varying vec3 vNormal;');
+      expect(cloudVertexShader).toContain('varying vec3 vPosition;');
+    });
+
+    it('should have a main function that sets gl_Position', () => {
+      expect(cloudVertexShader).toContain('void main()');
+      expect(cloudVertexShader).toContain('gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);');
     });
   });
 
