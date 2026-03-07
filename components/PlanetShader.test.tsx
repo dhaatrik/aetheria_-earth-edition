@@ -66,6 +66,23 @@ describe('Planet Shaders', () => {
       expect(planetFragmentShader).toContain('else if (uMode == 3)'); // Bio
     });
 
+    it('should apply terraforming modifiers correctly', () => {
+      expect(planetFragmentShader).toContain('float baseThreshold = 0.85 - (uSnowLevel * 0.85);');
+      expect(planetFragmentShader).toContain('float snowThreshold = baseThreshold;');
+      expect(planetFragmentShader).toContain('mix(dayColor, vec3(0.15, 0.12, 0.05), uWaterMurkiness * 0.8);');
+      expect(planetFragmentShader).toContain('pow(NdotH, 20.0) * waterMask * 0.5 * (1.0 - uWaterMurkiness);');
+    });
+
+    it('should define thermal map heatmap function', () => {
+      expect(planetFragmentShader).toContain('vec3 heatmap(float v)');
+      expect(planetFragmentShader).toContain('return vec3(value, 1.0 - abs(value - 0.5) * 2.0, 1.0 - value);');
+    });
+
+    it('should contain logic for vegetation estimator in biomass mode', () => {
+      expect(planetFragmentShader).toContain('if (g > r && g > b)');
+      expect(planetFragmentShader).toContain('bio = (g - max(r, b)) * 5.0;');
+    });
+
     it('should have a main function that sets gl_FragColor', () => {
       expect(planetFragmentShader).toContain('void main()');
       expect(planetFragmentShader).toContain('gl_FragColor =');
@@ -83,10 +100,22 @@ describe('Planet Shaders', () => {
 
     it('should use snoise for cloud movement/variation', () => {
       expect(cloudFragmentShader).toContain('snoise(pos');
+      expect(cloudFragmentShader).toContain('float noise1 = snoise(pos * 3.0 + vec3(uTime * 0.05, 0.0, 0.0));');
+      expect(cloudFragmentShader).toContain('float noise2 = snoise(pos * 12.0 - vec3(0.0, uTime * 0.1, 0.0));');
+      expect(cloudFragmentShader).toContain('float noiseFBM = (noise1 * 0.6 + noise2 * 0.3);');
+    });
+
+    it('should apply cloud density multiplier', () => {
+      expect(cloudFragmentShader).toContain('finalDensity *= uCloudDensity;');
+    });
+
+    it('should calculate cloud color with shadow and sun light mixing', () => {
+      expect(cloudFragmentShader).toContain('vec3 shadowColor = vec3(0.3, 0.35, 0.45) * uSunColor;');
+      expect(cloudFragmentShader).toContain('vec3 cloudColor = mix(shadowColor, sunColor, lightIntensity * 0.8 + 0.2);');
     });
 
     it('should discard transparent fragments', () => {
-      expect(cloudFragmentShader).toContain('discard;');
+      expect(cloudFragmentShader).toContain('if (finalDensity < 0.05) discard;');
     });
   });
 
@@ -97,8 +126,8 @@ describe('Planet Shaders', () => {
     });
 
     it('should implement atmosphere glow effect', () => {
-      expect(atmosphereFragmentShader).toContain('pow(');
-      expect(atmosphereFragmentShader).toContain('dot(vNormal, vec3(0, 0, 1.0))');
+      expect(atmosphereFragmentShader).toContain('float intensity = pow(0.65 - dot(vNormal, vec3(0, 0, 1.0)), 4.0);');
+      expect(atmosphereFragmentShader).toContain('gl_FragColor = vec4(uAtmosphereColor * uSunColor, 1.0) * intensity * 1.5;');
     });
   });
 
