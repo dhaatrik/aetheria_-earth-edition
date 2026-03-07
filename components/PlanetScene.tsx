@@ -48,6 +48,17 @@ const SUN_COLORS = {
   default: new THREE.Vector3(1.0, 0.95, 0.9),
 };
 
+// Helper to map SunType to Color
+const getSunColor = (type: string) => {
+  switch(type) {
+    case 'red': return SUN_COLORS.red;
+    case 'blue': return SUN_COLORS.blue;
+    default: return SUN_COLORS.default;
+  }
+};
+
+const SUN_DIR = new THREE.Vector3(1, 0.5, 1).normalize();
+
 export const PlanetMesh: React.FC<{ params: PlanetParameters, onClick: (uv: THREE.Vector2) => void }> = ({ params, onClick }) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const cloudRef = useRef<THREE.Mesh>(null);
@@ -68,17 +79,7 @@ export const PlanetMesh: React.FC<{ params: PlanetParameters, onClick: (uv: THRE
 
   const textures = useTexture(textureConfig);
 
-  // Helper to map SunType to Color
-  const getSunColor = (type: string) => {
-    switch(type) {
-      case 'red': return SUN_COLORS.red;
-      case 'blue': return SUN_COLORS.blue;
-      default: return SUN_COLORS.default;
-    }
-  };
-
   const sunColorVec = getSunColor(params.sunType);
-  const sunDir = useMemo(() => new THREE.Vector3(1, 0.5, 1).normalize(), []);
 
   // Map DataLayer string to int
   const getModeInt = (mode: string) => {
@@ -153,7 +154,7 @@ export const PlanetMesh: React.FC<{ params: PlanetParameters, onClick: (uv: THRE
         uSpecularTexture: { value: textures.spec },
         uNormalMap: { value: textures.norm },
         uCityNoiseTexture: { value: cityNoiseTexture },
-        uSunDirection: { value: sunDir },
+        uSunDirection: { value: SUN_DIR },
         uMode: { value: 0 },
         uSunColor: { value: sunColorVec },
         uSnowLevel: { value: 0 },
@@ -162,7 +163,7 @@ export const PlanetMesh: React.FC<{ params: PlanetParameters, onClick: (uv: THRE
         uCityIntensity: { value: params.cityLightIntensity }
       }
     });
-  }, [sunDir, cityNoiseTexture]); // Note: textures not in dep array to avoid full material rebuild, we update uniform directly
+  }, [cityNoiseTexture]); // Note: textures not in dep array to avoid full material rebuild, we update uniform directly
 
   // Effect to update material uniforms when textures/params change without rebuilding material
   useEffect(() => {
@@ -215,12 +216,12 @@ export const PlanetMesh: React.FC<{ params: PlanetParameters, onClick: (uv: THRE
       uniforms: {
         uTime: { value: 0 },
         uCloudTexture: { value: textures.cloud },
-        uSunDirection: { value: sunDir },
+        uSunDirection: { value: SUN_DIR },
         uSunColor: { value: sunColorVec },
         uCloudDensity: { value: 0.5 }
       }
     });
-  }, [sunDir]);
+  }, []);
 
   const atmosMaterial = useMemo(() => {
     return new THREE.ShaderMaterial({
