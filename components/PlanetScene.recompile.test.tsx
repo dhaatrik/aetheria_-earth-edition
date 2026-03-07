@@ -119,8 +119,6 @@ describe('PlanetMesh Material Stability', () => {
     const expectedColor = new THREE.Vector3(1.0, 0.4, 0.3);
     const actualColor = material.uniforms.uSunColor.value;
 
-    // console.log("Actual Sun Color:", actualColor);
-
     expect(actualColor.x).toBeCloseTo(expectedColor.x);
     expect(actualColor.y).toBeCloseTo(expectedColor.y);
     expect(actualColor.z).toBeCloseTo(expectedColor.z);
