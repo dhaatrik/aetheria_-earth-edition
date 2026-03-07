@@ -84,6 +84,19 @@ describe('Planet Shaders', () => {
     });
   });
 
+  describe('cloudVertexShader', () => {
+    it('should define required varyings', () => {
+      expect(cloudVertexShader).toContain('varying vec2 vUv;');
+      expect(cloudVertexShader).toContain('varying vec3 vNormal;');
+      expect(cloudVertexShader).toContain('varying vec3 vPosition;');
+    });
+
+    it('should have a main function that sets gl_Position', () => {
+      expect(cloudVertexShader).toContain('void main()');
+      expect(cloudVertexShader).toContain('gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);');
+    });
+  });
+
   describe('cloudFragmentShader', () => {
     it('should define required uniforms', () => {
       expect(cloudFragmentShader).toContain('uniform float uTime;');
