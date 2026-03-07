@@ -12,7 +12,8 @@
     "skipLibCheck": true,
     "types": [
       "node",
-      "three"
+      "three",
+      "@react-three/fiber"
     ],
     "moduleResolution": "bundler",
     "isolatedModules": true,
