@@ -90,6 +90,17 @@ describe('Planet Shaders', () => {
     });
   });
 
+  describe('atmosphereVertexShader', () => {
+    it('should define required varyings', () => {
+      expect(atmosphereVertexShader).toContain('varying vec3 vNormal;');
+    });
+
+    it('should have a main function and set gl_Position', () => {
+      expect(atmosphereVertexShader).toContain('void main()');
+      expect(atmosphereVertexShader).toContain('gl_Position =');
+    });
+  });
+
   describe('atmosphereFragmentShader', () => {
     it('should define required uniforms', () => {
       expect(atmosphereFragmentShader).toContain('uniform vec3 uAtmosphereColor;');
