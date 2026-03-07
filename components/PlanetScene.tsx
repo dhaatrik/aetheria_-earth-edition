@@ -22,21 +22,31 @@ interface SceneProps {
 // ------------------------------------------------------------------
 // SATELLITE RING
 // ------------------------------------------------------------------
+const SATELLITE_CONFIG = {
+  particleCount: 3000,
+  radius: 3.5,
+  speedXDivisor: 10,
+  speedYDivisor: 15,
+  tiltAngle: Math.PI / 4,
+  color: "#ffa0e0",
+  size: 0.02,
+};
+
 const SatelliteRing = () => {
   const ref = useRef<THREE.Points>(null);
-  const [sphere] = useState(() => random.inSphere(new Float32Array(3000), { radius: 3.5 })); 
+  const [sphere] = useState(() => random.inSphere(new Float32Array(SATELLITE_CONFIG.particleCount), { radius: SATELLITE_CONFIG.radius }));
 
   useFrame((state, delta) => {
     if (ref.current) {
-      ref.current.rotation.x -= delta / 10;
-      ref.current.rotation.y -= delta / 15;
+      ref.current.rotation.x -= delta / SATELLITE_CONFIG.speedXDivisor;
+      ref.current.rotation.y -= delta / SATELLITE_CONFIG.speedYDivisor;
     }
   });
 
   return (
-    <group rotation={[0, 0, Math.PI / 4]}>
+    <group rotation={[0, 0, SATELLITE_CONFIG.tiltAngle]}>
       <Points ref={ref} positions={sphere as Float32Array} stride={3} frustumCulled={false}>
-        <PointMaterial transparent color="#ffa0e0" size={0.02} sizeAttenuation={true} depthWrite={false} />
+        <PointMaterial transparent color={SATELLITE_CONFIG.color} size={SATELLITE_CONFIG.size} sizeAttenuation={true} depthWrite={false} />
       </Points>
     </group>
   );
