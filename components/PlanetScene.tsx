@@ -85,15 +85,20 @@ const getModeInt = (mode: string) => {
   }
 };
 
+const NOISE_BASE_SIZE = 16;
+const NOISE_BASE_ARRAY = new Float32Array(NOISE_BASE_SIZE * NOISE_BASE_SIZE);
+const NOISE_TEMP_RANDOM = new Uint8Array(NOISE_BASE_ARRAY.length);
+
 // Generate a seamless noise texture for city lights
 const generateCityNoiseTexture = () => {
     const size = 64;
     const data = new Uint8Array(size * size * 4);
 
-    // Generate low-res base noise (16x16) for coherence
-    const baseSize = 16;
-    const baseData = new Float32Array(baseSize * baseSize);
-    for(let i=0; i<baseData.length; i++) baseData[i] = Math.random();
+    // Generate low-res base noise for coherence
+    const baseSize = NOISE_BASE_SIZE;
+    const baseData = NOISE_BASE_ARRAY;
+    crypto.getRandomValues(NOISE_TEMP_RANDOM);
+    for (let i = 0; i < baseData.length; i++) baseData[i] = NOISE_TEMP_RANDOM[i] / 255;
 
     // Upscale to size x size with bilinear interpolation and wrapping
     for (let y = 0; y < size; y++) {
