@@ -67,6 +67,8 @@ const poiSchema = {
   required: ["title", "description"]
 };
 
+const MAX_BODY_SIZE = 1 * 1024 * 1024; // 1MB
+
 const server = http.createServer(async (req, res) => {
   res.setHeader('Content-Type', 'application/json');
 
@@ -77,11 +79,21 @@ const server = http.createServer(async (req, res) => {
   }
 
   let body = '';
+  let tooLarge = false;
+
   req.on('data', chunk => {
+    if (tooLarge) return;
     body += chunk.toString();
+    if (body.length > MAX_BODY_SIZE) {
+      tooLarge = true;
+      res.statusCode = 413;
+      res.end(JSON.stringify({ error: 'Payload Too Large' }));
+      req.destroy();
+    }
   });
 
   req.on('end', async () => {
+    if (tooLarge) return;
     try {
       const payload = body ? JSON.parse(body) : {};
       const url = req.url;
