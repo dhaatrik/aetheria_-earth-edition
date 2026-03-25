@@ -13,6 +13,8 @@ interface DashboardPanelProps {
     toggleProbe: () => void;
 }
 
+const SUN_TYPES: SunType[] = ['yellow', 'red', 'blue'];
+
 export const DashboardPanel: React.FC<DashboardPanelProps> = ({
     params,
     updateParams,
@@ -43,7 +45,7 @@ export const DashboardPanel: React.FC<DashboardPanelProps> = ({
             <div>
                 <h4 className="text-[10px] uppercase text-cyan-500 font-bold mb-3 tracking-widest">Star System</h4>
                 <div className="flex gap-2">
-                    {(['yellow', 'red', 'blue'] as SunType[]).map(type => (
+                    {SUN_TYPES.map(type => (
                         <button
                         key={type}
                         onClick={() => updateParams({ sunType: type })}
