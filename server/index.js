@@ -69,6 +69,17 @@ const poiSchema = {
 
 const MAX_BODY_SIZE = 1 * 1024 * 1024; // 1MB
 
+const sanitizeInput = (val, maxLength = 200, fallback = "Unknown") => {
+  if (typeof val !== 'string') return fallback;
+  const sanitized = val.trim().slice(0, maxLength).replace(/[\r\n]/g, ' ');
+  return sanitized || fallback;
+};
+
+const validateNumber = (val, fallback, min = -Infinity, max = Infinity) => {
+  const num = Number(val);
+  return Number.isNaN(num) ? fallback : Math.min(Math.max(num, min), max);
+};
+
 const server = http.createServer(async (req, res) => {
   res.setHeader('Content-Type', 'application/json');
 
@@ -111,7 +122,7 @@ const server = http.createServer(async (req, res) => {
         res.end(response.text);
 
       } else if (url === '/api/generatePlanetTexture') {
-        const { description } = payload;
+        const description = sanitizeInput(payload.description, 300, "a generic planet surface");
         const response = await ai.models.generateImages({
           model: 'imagen-4.0-generate-001',
           prompt: `A high quality, seamless, equirectangular projection texture map of a planet surface: ${description}. Flat lighting, no shadows, 4k resolution style. The map should show continents and oceans.`,
@@ -125,10 +136,11 @@ const server = http.createServer(async (req, res) => {
         res.end(JSON.stringify({ base64 }));
 
       } else if (url === '/api/triggerDisaster') {
-        const { currentLore } = payload;
+        const name = sanitizeInput(payload.currentLore?.name, 50, "Unknown World");
+        const description = sanitizeInput(payload.currentLore?.description, 300, "A mysterious planet");
         const response = await ai.models.generateContent({
           model: "gemini-3-flash-preview",
-          contents: `Current Planet: ${currentLore.name} (${currentLore.description}). Trigger a catastrophic global event (e.g. Gamma Ray Burst, Supervolcano, Artificial AI Takeover). Return the new visual and lore states.`,
+          contents: `Current Planet: ${name} (${description}). Trigger a catastrophic global event (e.g. Gamma Ray Burst, Supervolcano, Artificial AI Takeover). Return the new visual and lore states.`,
           config: {
             responseMimeType: "application/json",
             responseSchema: eventSchema
@@ -137,10 +149,11 @@ const server = http.createServer(async (req, res) => {
         res.end(response.text);
 
       } else if (url === '/api/evolveCivilization') {
-        const { currentLore, years } = payload;
+        const name = sanitizeInput(payload.currentLore?.name, 50, "Unknown World");
+        const years = validateNumber(payload.years, 0, -10000, 10000);
         const response = await ai.models.generateContent({
           model: "gemini-3-flash-preview",
-          contents: `Advance (or regress) the civilization of ${currentLore.name} by ${years} years. Describe the technological changes or collapse.`,
+          contents: `Advance (or regress) the civilization of ${name} by ${years} years. Describe the technological changes or collapse.`,
           config: {
             responseMimeType: "application/json",
             responseSchema: eventSchema
@@ -160,10 +173,12 @@ const server = http.createServer(async (req, res) => {
         res.end(response.text);
 
       } else if (url === '/api/generatePOIReport') {
-        const { loreContext, lat, lon } = payload;
+        const context = sanitizeInput(payload.loreContext, 500, "A futuristic planetary setting");
+        const latitude = validateNumber(payload.lat, 0, -90, 90);
+        const longitude = validateNumber(payload.lon, 0, -180, 180);
         const prompt = `
-          Context: ${loreContext}
-          Location: Latitude ${lat}, Longitude ${lon}.
+          Context: ${context}
+          Location: Latitude ${latitude}, Longitude ${longitude}.
           Generate a short sci-fi status report for this specific location.
         `;
         const response = await ai.models.generateContent({
