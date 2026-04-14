@@ -7,7 +7,7 @@ import type {
   POIData,
   ChallengeTarget,
   SimulationState
-} from './types';
+} from '../types';
 
 describe('Types Configuration', () => {
   it('validates PlanetLore structure', () => {

@@ -3,7 +3,7 @@ import { describe, it, expect, vi } from 'vitest';
 import React from 'react';
 import ReactThreeTestRenderer from '@react-three/test-renderer';
 import * as THREE from 'three';
-import { PlanetParameters } from '../types';
+import { PlanetParameters } from '../../types';
 
 vi.mock('three', async () => {
   const actual = await vi.importActual('three') as any;
@@ -47,7 +47,7 @@ vi.mock('maath/random/dist/maath-random.esm', () => ({
 }));
 
 // Import PlanetMesh AFTER mocking
-import { PlanetMesh } from './PlanetScene';
+import { PlanetMesh } from '../../components/PlanetScene';
 
 declare global {
   var vectorInstantiationCount: number;

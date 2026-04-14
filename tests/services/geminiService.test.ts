@@ -6,8 +6,8 @@ import {
   evolveCivilization,
   generateChallenge,
   generatePOIReport,
-} from './geminiService';
-import { PlanetLore, PlanetParameters } from '../types';
+} from '../../services/geminiService';
+import { PlanetLore, PlanetParameters } from '../../types';
 
 describe('geminiService', () => {
   beforeEach(() => {

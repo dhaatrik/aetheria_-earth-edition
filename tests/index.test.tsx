@@ -10,7 +10,7 @@ vi.mock('react-dom/client', () => ({
   },
 }));
 
-vi.mock('./App', () => ({
+vi.mock('../App', () => ({
   default: () => <div data-testid="mock-app" />,
 }));
 
@@ -22,7 +22,7 @@ describe('index.tsx', () => {
   });
 
   it('throws an error if root element is not found', async () => {
-    await expect(import('./index.tsx')).rejects.toThrow("Could not find root element to mount to");
+    await expect(import('../index.tsx')).rejects.toThrow("Could not find root element to mount to");
   });
 
   it('mounts the app if root element is found', async () => {
@@ -30,7 +30,7 @@ describe('index.tsx', () => {
     root.id = 'root';
     document.body.appendChild(root);
 
-    await import('./index.tsx');
+    await import('../index.tsx');
 
     expect(mockCreateRoot).toHaveBeenCalledWith(root);
     expect(mockRender).toHaveBeenCalled();

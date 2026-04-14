@@ -1,11 +1,8 @@
 /** @vitest-environment jsdom */
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import * as matchers from '@testing-library/jest-dom/matchers';
-import { Header } from './Header';
-
-expect.extend(matchers);
+import { render, screen, fireEvent, cleanup } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { Header } from '../../../components/ui/Header';
 
 describe('Header Component', () => {
     const mockToggleAudio = vi.fn();
@@ -22,6 +19,10 @@ describe('Header Component', () => {
 
     beforeEach(() => {
         vi.clearAllMocks();
+    });
+
+    afterEach(() => {
+        cleanup();
     });
 
     it('renders title and tagline correctly', () => {

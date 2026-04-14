@@ -3,8 +3,8 @@ import { describe, it, expect, vi } from 'vitest';
 import React from 'react';
 import ReactThreeTestRenderer from '@react-three/test-renderer';
 import * as THREE from 'three';
-import { PlanetMesh } from './PlanetScene';
-import { PlanetParameters } from '../types';
+import { PlanetMesh } from '../../components/PlanetScene';
+import { PlanetParameters } from '../../types';
 
 // Mock THREE.TextureLoader to avoid network requests and errors
 vi.mock('three', async () => {
