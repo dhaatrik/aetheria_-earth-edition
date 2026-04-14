@@ -1,11 +1,8 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import * as matchers from '@testing-library/jest-dom/matchers';
-import { UI } from './UI';
-
-expect.extend(matchers);
-import { SimulationState } from '../types';
+import { UI } from '../../components/UI';
+import { SimulationState } from '../../types';
 
 // @vitest-environment jsdom
 describe('UI Component', () => {

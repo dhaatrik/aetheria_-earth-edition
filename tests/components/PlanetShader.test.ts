@@ -7,7 +7,7 @@ import {
   atmosphereVertexShader,
   atmosphereFragmentShader,
   commonShaderPart
-} from './PlanetShader';
+} from '../../components/PlanetShader';
 
 describe('Planet Shaders', () => {
   describe('planetVertexShader', () => {

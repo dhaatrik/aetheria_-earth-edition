@@ -5,11 +5,11 @@ import React from 'react';
 import { render, screen, act, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { cleanup } from '@testing-library/react';
-import App from './App';
-import * as geminiService from './services/geminiService';
+import App from '../App';
+import * as geminiService from '../services/geminiService';
 
 // Mock the components
-vi.mock('./components/PlanetScene', () => ({
+vi.mock('../components/PlanetScene', () => ({
   PlanetScene: (props: any) => (
     <div data-testid="planet-scene" onClick={() => props.onPlanetClick({ x: 0.5, y: 0.5 })}>
       PlanetScene
@@ -17,7 +17,7 @@ vi.mock('./components/PlanetScene', () => ({
   )
 }));
 
-vi.mock('./components/UI', () => ({
+vi.mock('../components/UI', () => ({
   UI: (props: any) => (
     <div data-testid="ui">
       <button data-testid="ui-generate" onClick={props.onGenerate}>Generate</button>
@@ -33,12 +33,12 @@ vi.mock('./components/UI', () => ({
   )
 }));
 
-vi.mock('./components/SoundEngine', () => ({
+vi.mock('../components/SoundEngine', () => ({
   SoundEngine: () => <div data-testid="sound-engine">SoundEngine</div>
 }));
 
 // Mock the service
-vi.mock('./services/geminiService', () => ({
+vi.mock('../services/geminiService', () => ({
   generatePlanetData: vi.fn(),
   generatePOIReport: vi.fn(),
   generatePlanetTexture: vi.fn(),
